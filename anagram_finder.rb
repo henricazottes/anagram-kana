@@ -78,12 +78,8 @@ class AnagramFinder
   end
 
   def handle_progression
-    if @counter >= 1000
-      @counter = 0
-      @progression += (1000.0*100.0/(@total_words))
-      print_log "\rProgression: [#{"="*@progression.floor}#{" "*(100-@progression)}]"
-    end
-    @counter += 1
+    @progression += (100.0/(@total_words))
+    print_log "\rProgression: [#{"="*@progression.floor}#{" "*(100-@progression)}]"
   end
 
   def display_results(anagrams_found, tstart, tend)
