@@ -106,7 +106,7 @@ class AnagramFinder
 
   def find_anagrams
     possible_first_words  = @@dictionary.select {|word| word.length < @target.length}.
-                                         select {|word| !(word.chars.uniq & target.chars.uniq).empty?}
+                                         select {|word| (word.chars.uniq - target.chars.uniq).empty?}
     anagrams_found        = []
     tstart                = Time.now
     @progression          = 0.0
@@ -118,8 +118,8 @@ class AnagramFinder
       if include_letters? target, first_word
         target_letters_left   = substract target, first_word
         possible_second_word  = possible_first_words[index..-1].
-                                  select {|item| item.length == target_letters_left.length}.
-                                  select {|item| !(item.chars.uniq & target_letters_left.chars.uniq).empty?}
+                                  select {|word| word.length == target_letters_left.length}.
+                                  select {|word| (word.chars.uniq - target_letters_left.chars.uniq).empty?}
 
         possible_second_word.each do |second_word|
           extra_letters = substract target_letters_left, second_word
