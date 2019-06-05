@@ -1,10 +1,10 @@
 require 'time'
 
 class AnagramFinder
-  attr_reader :target
+  attr_reader :target, :dictionary
 
   def initialize(target="documenting", source_file="data/english_dictionary.txt", do_log=true)
-    @@dictionary = parse_dictionary source_file
+    @dictionary = parse_dictionary source_file
     @target      = target
     @do_log      = do_log
     @progression = 0.0
@@ -19,10 +19,6 @@ class AnagramFinder
   def parse_dictionary(source_file)
     wordlist_file = File.open(source_file)
     wordlist_file.read().split(" ")
-  end
-
-  def dictionary
-    @@dictionary
   end
 
   def puts_log(string)
@@ -69,7 +65,7 @@ class AnagramFinder
 
   def are_pairs_in_wordlist?(anagrams)
     anagrams.reduce(true) do |memo, anagram|
-      memo && (@@dictionary.include? anagram[0]) && (@@dictionary.include? anagram[1])
+      memo && (@dictionary.include? anagram[0]) && (@dictionary.include? anagram[1])
     end
   end
 
@@ -105,7 +101,7 @@ class AnagramFinder
   ##
 
   def find_anagrams
-    possible_first_words  = @@dictionary.select {|word| word.length < @target.length}.
+    possible_first_words  = @dictionary.select {|word| word.length < @target.length}.
                                          select {|word| (word.chars.uniq - target.chars.uniq).empty?}
     anagrams_found        = []
     tstart                = Time.now
