@@ -6,7 +6,7 @@ This is my solution for the Anagram kata from [Coding Dojo](http://codingdojo.or
 
 ```bash
 git clone git@github.com:henricazottes/anagram-kata.git
-cd anagram-kana
+cd anagram-kana/
 ruby main.rb # Will search for all two words anagrams of "elephant"
 ```
 
