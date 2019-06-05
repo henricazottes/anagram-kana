@@ -1,4 +1,5 @@
 require 'minitest/autorun'
+require 'time'
 
 class Anagram
   attr_reader :model, :anagrams
@@ -11,8 +12,6 @@ class Anagram
 
   def parse_dictionary
     wordlist_file = File.open("english_dictionary.txt")
-    # get rid of first line comment of the file
-    wordlist_file.first.chop
     wordlist_file.read().split(" ")
   end
 
@@ -21,12 +20,12 @@ class Anagram
   end
 
   def sort_word_letters(word)
-    word.downcase.split("").sort.join
+    word.downcase.chars.sort.join
   end
 
   def diff_words(word1, word2)
-    letters1 = word1.split("")
-    letters2 = word2.split("")
+    letters1 = word1.chars
+    letters2 = word2.chars
 
     letters2.each do |letter|
       letters1.delete_at letters1.index(letter) unless letters1.index(letter).nil?
@@ -36,35 +35,52 @@ class Anagram
   end
 
   def include_letters?(word1, word2)
-    letters1 = word1.split("")
-    letters2 = word2.split("")
+    letters1 = word1.chars
+    letters2 = word2.chars
+    result   = true
 
-    letters2.uniq.reduce(true) do |memo, letter|
-      memo && (letters1.count(letter) >= letters2.count(letter))
+    letters2.uniq.each do |letter|
+      if !(letters1.count(letter) >= letters2.count(letter))
+        result = false
+        break
+      end
     end
+
+    result
   end
 
   def find_anagrams
     anagrams_found        = []
     model_length          = @model.length
-    possible_first_words  = @@dictionary.select {|item| item.length < model_length}
     counter               = 0
     progression           = 0.0
+    possible_first_words  = @@dictionary.select {|item| item.length < model_length}.
+                                         select {|item| !(item.chars.uniq & model.chars.uniq).empty?}
     total_words           = possible_first_words.count
 
     puts "Total words: #{total_words}."
     puts "Progression: #{progression}%."
 
+    tstart     = Time.now
+    tend       = tstart
+    titeration = tstart
+
     possible_first_words.each_with_index do |first_word, index|
       counter += 1
+
       if counter >= 1000
-        counter      = 0
-        progression += (1000.0*100.0/(total_words)).round(2)
-        puts "Progression: #{progression}%."
+        tend    = Time.now
+        delta   = tend - titeration
+        titeration  = tend
+        counter = 0
+        progression += (1000.0*100.0/(total_words))
+        puts "Progression: #{progression.round(2)}% done in #{delta.round(2)}s."
       end
+
       if include_letters? model, first_word
-        possible_second_word  = possible_first_words[index..-1]
         model_letters_left    = diff_words model, first_word
+        possible_second_word  = possible_first_words[index..-1].select {|item| item.length == model_letters_left.length}.
+                                                                select {|item| !(item.chars.uniq & model_letters_left.chars.uniq).empty?}
 
         possible_second_word.each do |second_word|
           extra_letters = diff_words model_letters_left, second_word
@@ -72,10 +88,11 @@ class Anagram
             anagrams_found.push [first_word, second_word]
           end
         end
-
       end
+
     end
 
+    puts "Done in #{(tend-tstart).round(2)}s."
     anagrams_found
   end
 
@@ -99,10 +116,10 @@ class Anagram
 
 end
 
-anagram = Anagram.new("acrobatafrica")
+anagram = Anagram.new("elephant")
 puts "\n#{anagram.anagrams.count} anagrams found for #{anagram.model}."
 anagram.anagrams.each do |anagram|
-  puts "- #{anagram[0]}/#{anagram[1]}\n\n"
+  puts "- #{anagram[0]}/#{anagram[1]}"
 end
 
 
